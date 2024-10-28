@@ -90,7 +90,7 @@ enum ASCIIControlCharacter: Character {
 
 //#####   Implicitly Assigned Raw Values  #####//
 
-enum color: Int {
+enum Color: Int {
     case blue = 1, green, yellow, cyan, red, black, white, scarlet
 }
 
@@ -98,7 +98,56 @@ enum Utensil: String {
     case fork, spoon, chopsticks, pot
 }
 
-let colorPosition = color.scarlet.rawValue
+let colorPosition = Color.scarlet.rawValue
 print(colorPosition) // scarlet at position 8
 let whichUtensil = Utensil.chopsticks.rawValue
 print(whichUtensil) // It's chopsticks
+
+//#####   Initializing from a Raw Value  #####//
+
+let possibleColor = Color(rawValue: 7)
+print(possibleColor!) // now possible color is white
+
+let positionToFind = 11
+
+if let someColor = Color(rawValue: positionToFind) {
+    switch someColor {
+    case .yellow:
+        print("color is yellow")
+    default:
+        print("Not your color")   
+    }
+} else {
+    print("not color is at position \(positionToFind)")
+}   
+// position 11 does not exist , so print "no color is at position 11"
+
+//#####   Recursive Enumerations  #####//
+
+indirect enum ArithmeticExpression {
+    case number(Int)
+    case addition(ArithmeticExpression, ArithmeticExpression)
+    case multiplication(ArithmeticExpression, ArithmeticExpression)
+}
+
+
+let five = ArithmeticExpression.number(5)
+let four = ArithmeticExpression.number(4)
+let sum = ArithmeticExpression.addition(five, four)
+let product = ArithmeticExpression.multiplication(sum, ArithmeticExpression.number(2))
+
+
+func evaluate(_ expression: ArithmeticExpression) -> Int {
+    switch expression {
+    case let .number(value):
+        return value
+    case let .addition(left, right):
+        return evaluate(left) + evaluate(right)
+    case let .multiplication(left, right):
+        return evaluate(left) * evaluate(right)
+    }
+}
+
+
+print(evaluate(product))
+// Prints "18"
