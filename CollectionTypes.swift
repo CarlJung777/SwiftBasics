@@ -133,3 +133,126 @@ var subtractingSet = oddDigits.subtracting(singleDigitPrimeNumbers).sorted()
 // [1, 9]
 var symmetricDifferenceSet = oddDigits.symmetricDifference(singleDigitPrimeNumbers).sorted()
 // [1, 2, 9]
+
+
+//#####   Set Membership and Equality   #####//
+
+// “is equal” operator (==) to determine whether two sets contain all of the same values.
+
+// isSubset(of:) method to determine whether all of the values of a set are contained in the specified set.
+
+// isSuperset(of:) method to determine whether a set contains all of the values in a specified set.
+
+// isStrictSubset(of:) or isStrictSuperset(of:) methods to determine whether a set is a subset or superset, but not equal to, a specified set.
+
+// isDisjoint(with:) method to determine whether two sets have no values in common.
+
+let houseAnimals: Set = ["🐶", "🐱"]
+let sameHouseAnimals: Set = ["🐶", "🐱"]
+let farmAnimals: Set = ["🐮", "🐔", "🐑", "🐶", "🐱"]
+let cityAnimals: Set = ["🐦", "🐭"]
+
+
+var subsetOrNot = houseAnimals.isSubset(of: farmAnimals)
+print(subsetOrNot)// true
+
+var superSetOrNot = farmAnimals.isSuperset(of: houseAnimals)
+print(superSetOrNot)// true
+
+var disjointOrNot = farmAnimals.isDisjoint(with: cityAnimals)
+print(disjointOrNot)// true
+
+var strictSubsetOrNot = houseAnimals.isStrictSubset(of: farmAnimals)
+var strictSupersetOrNot = houseAnimals.isStrictSuperset(of: farmAnimals)
+print(strictSubsetOrNot,strictSupersetOrNot) // true false
+// true
+if  houseAnimals == sameHouseAnimals {
+    print("true")
+} else {
+    print("flase")
+    
+}
+
+
+
+//#####   Creating an Empty Dictionary   #####//
+var namesOfIntegers: [Int: String] = [:]
+namesOfIntegers[16] = "sixteen"
+// namesOfIntegers now contains 1 key-value pair
+namesOfIntegers = [:]
+// namesOfIntegers is once again an empty dictionary of type [Int: String]
+
+//#####   Creating a Dictionary with a Dictionary Literal  #####//
+var airports: [String: String] = ["YYZ": "Toronto Pearson", "DUB": "Dublin"]
+// Alternatively
+var smaeAirports = ["YYZ": "Toronto Pearson", "DUB": "Dublin"]
+
+//#####   Accessing and Modifying a Dictionary  #####//
+
+print("The airports dictionary contains \(airports.count) items.")
+// Prints "The airports dictionary contains 2 items."
+
+if airports.isEmpty {
+    print("The airports dictionary is empty.")
+} else {
+    print("The airports dictionary isn't empty.")
+}
+// Prints "The airports dictionary isn't empty."
+
+
+airports["LHR"] = "London"
+// the airports dictionary now contains 3 items
+
+airports["LHR"] = "London Heathrow"
+// the value for "LHR" has been changed to "London Heathrow"
+
+if let oldValue = airports.updateValue("Dublin Airport", forKey: "DUB") {
+    print("The old value for DUB was \(oldValue).")
+}
+// Prints "The old value for DUB was Dublin."
+
+if let airportName = airports["DUB"] {
+    print("The name of the airport is \(airportName).")
+} else {
+    print("That airport isn't in the airports dictionary.")
+}
+// Prints "The name of the airport is Dublin Airport."
+
+airports["APL"] = "Apple International"
+// "Apple International" isn't the real airport for APL, so delete it
+airports["APL"] = nil
+// APL has now been removed from the dictionary
+
+if let removedValue = airports.removeValue(forKey: "DUB") {
+    print("The removed airport's name is \(removedValue).")
+} else {
+    print("The airports dictionary doesn't contain a value for DUB.")
+}
+// Prints "The removed airport's name is Dublin Airport."
+
+
+//#####   Iterating Over a Dictionary   #####//
+for (airportCode, airportName) in airports {
+    print("\(airportCode): \(airportName)")
+}
+
+
+for airportCode in airports.keys {
+    print("Airport code: \(airportCode)")
+}
+// Airport code: LHR
+// Airport code: YYZ
+
+
+for airportName in airports.values {
+    print("Airport name: \(airportName)")
+}
+// Airport name: London Heathrow
+// Airport name: Toronto Pearson
+
+
+// If you need to use a dictionary’s keys or values with an API that takes an Array instance
+let airportCodes = [String](airports.keys)
+// airportCodes is ["LHR", "YYZ"]
+let airportNames = [String](airports.values)
+// airportNames is ["London Heathrow", "Toronto Pearson"]
