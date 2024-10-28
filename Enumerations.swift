@@ -46,6 +46,8 @@ default:
 }
 // Prints "Mostly harmless"
 
+
+
 //#####  Iterating over Enumeration Cases   #####//
 
 enum Animal: CaseIterable {
@@ -61,6 +63,8 @@ for animal in Animal.allCases {
 // dog
 // cat
 // ant
+
+
 
 //#####   Associated Values  #####//
 
@@ -80,6 +84,8 @@ case .qrCode(let productCode):
 }
 // Prints "QR code: ABCDEFGHIJKLMNOP."
 
+
+
 //#####   Raw Values  #####//
 
 enum ASCIIControlCharacter: Character {
@@ -87,6 +93,8 @@ enum ASCIIControlCharacter: Character {
     case lineFeed = "\n"
     case carriageReturn = "\r"
 }
+
+
 
 //#####   Implicitly Assigned Raw Values  #####//
 
@@ -102,6 +110,8 @@ let colorPosition = Color.scarlet.rawValue
 print(colorPosition) // scarlet at position 8
 let whichUtensil = Utensil.chopsticks.rawValue
 print(whichUtensil) // It's chopsticks
+
+
 
 //#####   Initializing from a Raw Value  #####//
 
@@ -121,6 +131,8 @@ if let someColor = Color(rawValue: positionToFind) {
     print("not color is at position \(positionToFind)")
 }   
 // position 11 does not exist , so print "no color is at position 11"
+
+
 
 //#####   Recursive Enumerations  #####//
 
