@@ -50,25 +50,32 @@ reversedNames = names.sorted(by: >)
 
 
 
-//#####   Trailing Closures  #####//
+//#####   Trailing Closures 尾随闭包  #####//
+// 尾随闭包是一种书写闭包的简洁方式
+// 如果函数的最后一个参数是闭包，可以在函数调用的圆括号外写闭包
+
+// 这是一个接受闭包 closure 的函数，闭包的类型是 () -> Void
+// 也就是一个不接受参数且没有返回值的闭包
 func someFunctionThatTakesAClosure(closure: () -> Void) {
     // function body goes here
 }
 
 // Here's how you call this function without using a trailing closure:
-
+// 常规闭包调用，通过 closure 参数传递一个闭包
 someFunctionThatTakesAClosure(closure: {
     // closure's body goes here
 })
 
 // Here's how you call this function with a trailing closure instead:
-
-
+// 这里使用尾随闭包
 someFunctionThatTakesAClosure() {
     // trailing closure's body goes here
+    // 
 }
 
+// 这是一个尾随闭包，对应的常规写法是 reversedNames = names.sorted(by: { $0 > $1 })
 reversedNames = names.sorted() { $0 > $1 }
+// 如果函数或方法的唯一参数是一个闭包，调用的时候可以不写一对圆括号 ()
 reversedNames = names.sorted { $0 > $1 }
 
 let digitNames = [
@@ -154,9 +161,61 @@ print(counter2())  // 输出 3
 
 
 //#####   Escaping Closures  #####//
+// 通过 @escaping 关键字声明逃逸闭包。
+// Escaping closures 允许你在函数返回后仍然使用闭包，适用于异步操作和存储闭包的场景。
+// 注意闭包可能会持有对其上下文的强引用，从而导致内存泄漏
+
+var completionHandlers: [() -> Void] = [] // 可变数组，用于存储多个没有参数和返回值的闭包
+
+func someFunctionWithEscapingClosure(completionHandler: @escaping () -> Void) {
+    completionHandlers.append(completionHandler)
+}
+
+// 强引用循环（retain cycles）？？？？！！！！
+// 在结构体或枚举中，不能使用逃逸闭包捕获可变引用
+
+//#####   Autoclosures 自动闭包  #####//
+// 一种特殊的闭包，用于简化代码，使得闭包参数可以像普通表达式一样传入，并支持延迟执行。
+
+// 延迟执行的用途
+var customersInLine = ["Chris", "Alex", "Ewa", "Barry", "Daniella"]
+let customerProvider = { customersInLine.remove(at: 0) }
+// 即使闭包的内容会移除第一个元素，但在 customerProvider() 被调用之前，这个操作是不会执行的。
+print(customersInLine.count) // 5
+print("Now serving \(customerProvider())!") // Now serving Chris!
+print(customersInLine.count) // 4
+
+
+// 函数中的自动闭包
+func serve(customer customerProvider: @autoclosure () -> String) {
+    print("Now serving \(customerProvider())!")
+}
+
+serve(customer: customersInLine.remove(at: 0)) 
+// 添加 @autoclosure 使得 serve(customer:) 函数可以像接受字符串参数一样使用，
+// 但实际上 Swift 将表达式 customersInLine.remove(at: 0) 自动封装为一个闭包，
+// 直到调用 customerProvider() 时才会执行。
 
 
 
-//#####   Autoclosures  #####//
+// @escaping 和 @autoclosure 的结合
 
+var customerProviders: [() -> String] = []
+func collectCustomerProviders(_ customerProvider: @autoclosure @escaping () -> String) {
+    customerProviders.append(customerProvider)
+}
+collectCustomerProviders(customersInLine.remove(at: 0))
+collectCustomerProviders(customersInLine.remove(at: 0))
 
+print("Collected \(customerProviders.count) closures.") // Collected 2 closures.
+for customerProvider in customerProviders {
+    print("Now serving \(customerProvider())!")
+}
+// collectCustomerProviders 函数没有立即调用传入的 customerProvider 闭包，
+// 而是将其添加到 customerProviders 数组中。由于闭包被存储到数组中并在函数结束后执行，
+// 所以它们必须能逃逸出函数作用域，因此需要 @escaping。
+
+// 自动闭包总结
+// 自动闭包 允许用表达式代替闭包来传参，简化代码。
+// 延迟执行 可以提升代码效率，因为表达式只有在闭包被调用时才执行。
+// 使用 @autoclosure @escaping 可以让闭包逃逸出函数作用域，延迟到函数返回后再执行。
