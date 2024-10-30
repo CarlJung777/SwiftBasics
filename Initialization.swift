@@ -38,12 +38,12 @@ class SurveyQuestion {
 // Default Initializers   默认初始化器
 // 如果一个结构体或类的所有属性都有默认值，
 // 并且没有自己定义任何初始化器，Swift 会自动生成一个默认的初始化器
-class ShoppingListItem {
+class sShoppingListItem {
     var name: String?          // 可选类型，默认值为 nil
     var quantity = 1           // 默认值为 1
     var purchased = false      // 默认值为 false
 }
-var item = ShoppingListItem()
+var item = sShoppingListItem()
 
 
 // 成员逐一初始化器  Memberwise Initializers for Structure Types
@@ -193,3 +193,249 @@ class blackDog: blackAnimal {
     }
     // 因为 Dog 已经实现了所有父类的指定初始化器 (init(age:))，它会自动继承父类的便捷初始化器 init()。
 }
+
+
+// Designated and Convenience Initializers in Action
+
+// Food 类是层次结构中的基类，负责封装食物的名称。
+class Food {
+    var name: String
+    // 指定初始化器 init(name: String)：必须传入名称的初始化器，确保所有存储属性都被完全初始化。
+    init(name: String) {
+        self.name = name
+    }
+    // 便捷初始化器 init()：这是一个无参数的初始化器，
+    // 提供默认名称 "[Unnamed]"，通过调用指定初始化器 init(name: String) 实现。
+    convenience init() {
+        self.init(name: "[Unnamed]")
+    }
+}
+
+let namedMeat = Food(name: "Bacon")  // namedMeat的name为"Bacon"
+let mysteryMeat = Food()              // mysteryMeat的name为"[Unnamed]"
+
+// RecipeIngredient 类继承自 Food，并添加了一个新的 Int 类型属性 quantity，表示食材的数量。
+class RecipeIngredient: Food {
+    var quantity: Int
+    // 指定初始化器 init(name: String, quantity: Int)：接受名称和数量，
+    // 并在初始化中设置数量，然后调用父类的指定初始化器。
+    init(name: String, quantity: Int) {
+        self.quantity = quantity
+        super.init(name: name)
+    }
+    override convenience init(name: String) {
+        self.init(name: name, quantity: 1)
+    }
+}
+// RecipeIngredient 类重写了父类的便捷初始化器，但由于实现了所有指定初始化器
+// RecipeIngredient 也自动继承了 Food 的便捷初始化器 init()。
+let oneMysteryItem = RecipeIngredient()                 // 数量默认为1
+let oneBacon = RecipeIngredient(name: "Bacon")          // oneBacon的name为"Bacon"，数量为1
+let sixEggs = RecipeIngredient(name: "Eggs", quantity: 6) // sixEggs的name为"Eggs"，数量为6
+
+
+class ShoppingListItem: RecipeIngredient {
+    var purchased = false
+    var description: String {
+        var output = "\(quantity) x \(name)"
+        output += purchased ? " ✔" : " ✘"
+        return output
+    }
+}
+// ShoppingListItem 类没有定义初始化器，因为它提供的属性都有默认值，
+// 因此自动继承了所有指定和便捷初始化器。
+
+var breakfastList = [
+    ShoppingListItem(),
+    ShoppingListItem(name: "Bacon"),
+    ShoppingListItem(name: "Eggs", quantity: 6),
+]
+breakfastList[0].name = "Orange juice"  // 修改第一个项目的name为"Orange juice"
+breakfastList[0].purchased = true         // 标记为已购买
+
+for item in breakfastList {
+    print(item.description)
+}
+// 输出:
+// 1 x Orange juice ✔
+// 1 x Bacon ✘
+// 6 x Eggs ✘
+
+
+// 初始化器的继承：通过不同的初始化器，子类可以安全地初始化其所有属性，
+// 并且可以自动继承父类的初始化器，减少了重复代码的需要。
+
+// 类的层次结构：Food 类作为基类提供基本的属性和功能，
+// RecipeIngredient 和 ShoppingListItem 类在此基础上扩展并实现了各自特定的功能。
+
+// 便捷性和可读性：便捷初始化器的存在使得创建实例更加便捷，
+// 尤其是在不需要提供所有属性值时，提高了代码的可读性和简洁性。
+
+
+//  可失败初始化器 Failable Initializers
+struct aAnimal {
+    let species: String
+    // 可以在初始化失败时返回 nil
+    init?(species: String) {
+        if species.isEmpty { return nil }
+        self.species = species
+    }
+}
+
+let someCreature = aAnimal(species: "Giraffe")
+// someCreature 是 aAnimal? 类型，表示初始化成功
+
+if let giraffe = someCreature {
+    print("An animal was initialized with a species of \(giraffe.species)")
+}
+// 输出: "An aAnimal was initialized with a species of Giraffe"
+
+let anonymousCreature = aAnimal(species: "")
+// anonymousCreature 是 aAnimal? 类型，表示初始化失败
+
+if anonymousCreature == nil {
+    print("The anonymous creature couldn't be initialized")
+}
+// 输出: "The anonymous creature couldn't be initialized"
+
+
+//  可失败初始化器用于枚举  Failable Initializers for Enumerations
+
+enum TemperatureUnit {
+    case kelvin, celsius, fahrenheit
+    // 传入的字符 symbol 来初始化相应的枚举值，如果不匹配任何情况，则返回 nil。
+    init?(symbol: Character) {
+        switch symbol {
+        case "K":
+            self = .kelvin
+        case "C":
+            self = .celsius
+        case "F":
+            self = .fahrenheit
+        default:
+            return nil
+        }
+    }
+}
+
+let fahrenheitUnit = TemperatureUnit(symbol: "F")
+if fahrenheitUnit != nil {
+    print("This is a defined temperature unit, so initialization succeeded.")
+}
+// 输出: "This is a defined temperature unit, so initialization succeeded."
+
+let unknownUnit = TemperatureUnit(symbol: "X")
+if unknownUnit == nil {
+    print("This isn't a defined temperature unit, so initialization failed.")
+}
+// 输出: "This isn't a defined temperature unit, so initialization failed."
+
+
+//  具有原始值的枚举的可失败初始化器  Propagation of Initialization Failure
+enum tTemperatureUnit: Character {
+    case kelvin = "K", celsius = "C", fahrenheit = "F"
+}
+
+let ffahrenheitUnit = tTemperatureUnit(rawValue: "F")
+if fahrenheitUnit != nil {
+    print("This is a defined temperature unit, so initialization succeeded.")
+}
+// 输出: "This is a defined temperature unit, so initialization succeeded."
+
+let uunknownUnit = tTemperatureUnit(rawValue: "X")
+if unknownUnit == nil {
+    print("This isn't a defined temperature unit, so initialization failed.")
+}
+// 输出: "This isn't a defined temperature unit, so initialization failed."
+
+
+// 重写可失败初始化器 Overriding a Failable Initializer
+// 这部分内容介绍了如何在 Swift 中重写可失败初始化器（Failable Initializers），
+// 以及如何使用隐式解包可失败初始化器（Implicitly Unwrapped Failable Initializers）。
+
+class Document {
+    var name: String?
+    // 这个初始化器创建一个名称为 nil 的文档
+    init() {}
+    
+    // 这个初始化器创建一个非空名称的文档
+    init?(name: String) {
+        if name.isEmpty { return nil }
+        self.name = name
+    }
+}
+
+class AutomaticallyNamedDocument: Document {
+    // 重写
+    override init() {
+        super.init()
+        self.name = "[Untitled]"
+    }
+    // 重写
+    override init(name: String) {
+        super.init()
+        if name.isEmpty {
+            self.name = "[Untitled]"
+        } else {
+            self.name = name
+        }
+    }
+}
+
+class UntitledDocument: Document {
+    override init() {
+        super.init(name: "[Untitled]")!  // 使用 ！ 强制解包
+    }
+}
+
+// The init! Failable Initializer  隐式解包可失败初始化器   init!()
+// 您可以在 init? 和 init! 之间进行委托，反之亦然，也可以从 init 委托到 init!。
+// 如果从 init! 委托到 init?，会触发一个断言，前提是 init! 初始化器导致初始化失败。
+
+// Required Initializers
+// required 初始化器用于确保每个子类都必须实现该初始化器
+// 关键字 required
+class SomeClass {
+    required init() {
+        // 初始化器实现
+    }
+}
+// 子类也需要使用关键字 required ，为了确保在更深层次的子类中，这一初始化器的要求仍然有效
+class SomeSubclass: SomeClass {
+    required init() {
+        // 子类实现的 required 初始化器
+    }
+}
+// 如果子类可以通过继承父类的初始化器来满足 required 初始化器的要求，则无需提供显式实现。
+class AnotherSubclass: SomeSubclass {
+    // 不需要实现 required 初始化器
+}
+
+
+// 使用闭包或函数为存储属性设置默认值
+// Setting a Default Property Value with a Closure or Function
+
+// boardColors 属性使用一个闭包来初始化，闭包的逻辑计算出每个方格的颜色
+struct Chessboard {
+    let boardColors: [Bool] = {
+        var temporaryBoard: [Bool] = []
+        var isBlack = false
+        for i in 1...8 {
+            for j in 1...8 {
+                temporaryBoard.append(isBlack)
+                isBlack = !isBlack
+            }
+            isBlack = !isBlack
+        }
+        return temporaryBoard
+    }()
+    
+    func squareIsBlackAt(row: Int, column: Int) -> Bool {
+        return boardColors[(row * 8) + column]
+    }
+}
+
+// 当创建一个新的 Chessboard 实例时，闭包会被执行，boardColors 的默认值会被计算并返回
+let board = Chessboard()
+print(board.squareIsBlackAt(row: 0, column: 1))  // 打印 "true"
+print(board.squareIsBlackAt(row: 7, column: 7))  // 打印 "false"
